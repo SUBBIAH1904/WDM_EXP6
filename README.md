@@ -1,5 +1,5 @@
 ### EX NO : 06
-### DATE: 
+### DATE: 28/09/2024
 # <p align="center">Information Retrieval Using Vector Space Model in Python</p>
 ## AIM: 
 To implement Information Retrieval Using Vector Space Model in Python.
