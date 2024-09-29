@@ -1,6 +1,9 @@
 ### EX6 Information Retrieval Using Vector Space Model in Python
+
 ### DATE: 28-09-2024
+
 ### AIM: To implement Information Retrieval Using Vector Space Model in Python.
+
 ### Description: 
 <div align = "justify">
 Implementing Information Retrieval using the Vector Space Model in Python involves several steps, including preprocessing text data, constructing a term-document matrix, 
@@ -17,67 +20,115 @@ sklearn to demonstrate Information Retrieval using the Vector Space Model.
 ### Program:
 
 ```python
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-import string
+import numpy as np
+import pandas as pd
 
-# Sample documents
-documents = [
-    "This is the first document.",
-    "This document is the second document.",
-    "And this is the third one.",
-    "Is this the first document?",
-]
+class BooleanRetrieval:
+    def _init_(self):
+        self.index = {}
+        self.documents_matrix = None
 
-# Preprocessing function to tokenize and remove stopwords/punctuation
-def preprocess_text(text):
-    tokens = word_tokenize(text.lower())
-    tokens = [token for token in tokens if token not in stopwords.words("english") and token not in string.punctuation]
-    return " ".join(tokens)
-    print(tokens)
+    def index_document(self, doc_id, text):
+        terms = text.lower().split()
+        print("Document -", doc_id, terms)
 
-# Preprocess documents
-preprocessed_docs = [preprocess_text(doc) for doc in documents]
+        for term in terms:
+            if term not in self.index:
+                self.index[term] = set()
+            self.index[term].add(doc_id)
 
-# Construct TF-IDF matrix
-tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(preprocessed_docs)
+    def create_documents_matrix(self, documents):
+        terms = list(self.index.keys())
+        num_docs = len(documents)
+        num_terms = len(terms)
 
+        self.documents_matrix = np.zeros((num_docs, num_terms), dtype=int)
 
-# Calculate cosine similarity between query and documents
-def search(query, tfidf_matrix, tfidf_vectorizer):
-    preprocessed_query = preprocess_text(query)
-    query_vector = tfidf_vectorizer.transform([preprocessed_query])
+        for i, (doc_id, text) in enumerate(documents.items()):
+            doc_terms = text.lower().split()
+            for term in doc_terms:
+                if term in self.index:
+                    term_id = terms.index(term)
+                    self.documents_matrix[i, term_id] = 1
 
-    # Calculate cosine similarity between query and documents
-    similarity_scores = cosine_similarity(query_vector, tfidf_matrix)
+    def print_documents_matrix_table(self):
+        df = pd.DataFrame(self.documents_matrix, columns=self.index.keys())
+        print(df)
 
-    # Sort documents based on similarity scores
-    sorted_indexes = similarity_scores.argsort()[0][::-1]
+    def print_all_terms(self):
+        print("All terms in the documents:")
+        print(list(self.index.keys()))
 
-    # Return sorted documents along with their similarity scores
-    results = [(documents[i], similarity_scores[0, i]) for i in sorted_indexes]
-    return results
-# Example query
-query =input("Enter query: ")
+    def boolean_search(self, query):
+        query_terms = query.lower().split()
+        results = set()  # Initialize as empty set to accumulate results
+        current_set = None  # Current set to handle 'or' logic
 
-# Perform search
-search_results = search(query, tfidf_matrix, tfidf_vectorizer)
+        i = 0
+        while i < len(query_terms):
+            term = query_terms[i]
 
-# Display search results
-i=1
-for result in search_results:
-    print("----------------------")
-    print("\nRank: ",i)
-    print("Document:", result[0])
-    print("Similarity Score:", result[1])
+            if term == 'or':
+                if current_set is not None:
+                    results.update(current_set)
+                current_set = None  # Reset current set for the next term
+            elif term == 'and':
+                i += 1
+                continue  # 'and' is implicit, move to next term
+            elif term == 'not':
+                i += 1
+                if i < len(query_terms):
+                    not_term = query_terms[i]
+                    if not_term in self.index:
+                        not_docs = self.index[not_term]
+                        if current_set is None:
+                            current_set = set(range(1, len(documents) + 1))  # All doc IDs
+                        current_set.difference_update(not_docs)
+            else:
+                if term in self.index:
+                    term_docs = self.index[term]
+                    if current_set is None:
+                        current_set = term_docs.copy()
+                    else:
+                        current_set.intersection_update(term_docs)
+                else:
+                    current_set = set()  # If the term doesn't exist, it results in an empty set
 
-    i=i+1
+            i += 1
+
+        # Update results with the last processed set
+        if current_set is not None:
+            results.update(current_set)
+
+        return sorted(results)
+
+if _name_ == "_main_":
+    indexer = BooleanRetrieval()
+
+    documents = {
+        1: "Python is a programming language",
+        2: "Information retrieval deals with finding information",
+        3: "Boolean models are used in information retrieval"
+    }
+
+    for doc_id, text in documents.items():
+        indexer.index_document(doc_id, text)
+
+    indexer.create_documents_matrix(documents)
+    indexer.print_documents_matrix_table()
+    indexer.print_all_terms()
+
+    query = input("Enter your boolean query: ")
+    results = indexer.boolean_search(query)
+    if results:
+        print(f"Results for '{query}': {results}")
+    else:
+        print("No results found for the query.")
 ```
 ### Output:
-![image](https://github.com/21005984/WDM_EXP6/assets/94748389/eaea3a2e-9317-4e73-83f2-d8153afef6d5)
+
+![11](https://github.com/user-attachments/assets/08014843-6078-4d47-a188-0a245790bfcd)
+
 
 ### Result:
 Thus, the implementation of Information Retrieval Using Vector Space Model in Python is executed successfully.
