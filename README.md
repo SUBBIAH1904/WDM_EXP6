@@ -17,7 +17,7 @@ sklearn to demonstrate Information Retrieval using the Vector Space Model.
 ### Program:
 
 ```
- import requests
+import requests
 from bs4 import BeautifulSoup
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -26,8 +26,10 @@ from nltk.corpus import stopwords
 import string
 import nltk
 
+# Download necessary NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('punkt_tab') # Download the missing 'punkt_tab' data
 
 # Sample documents stored in a dictionary
 documents = {
@@ -83,10 +85,6 @@ for i, result in enumerate(search_results, start=1):
 # Get the highest rank cosine score
 highest_rank_score = max(result[2] for result in search_results)
 print("The highest rank cosine score is:", highest_rank_score)
-
-
-  
-
 ```
 ### Output:
 ![image](https://github.com/user-attachments/assets/dd007ae4-a3b4-49c8-8c3f-5f249f39a77f)
